@@ -5,93 +5,92 @@
    :use	[clojure.pprint]))
 	
 (defn read-file
-  "open and read the csv file
-  Takes a CSV as a char sequence or string, and returns a lazy sequence of 
-  vectors of strings; each vector corresponds to a row, and each string is 
-  one field from that row. Be careful to ensure that if you read lazily from 
-  a file or some other resource that it remains open when the sequence is consumed.
-  http://stackoverflow.com/questions/23717331/clojure-lein-run-unable-to-resolve-symbol
-  http://stackoverflow.com/questions/19645160/using-clojure-csv-core-to-parse-a-huge-csv-file"
+  "Open and read CSV file placed in ./resources dir of clojure project.  
+  Please see documentation for formatting of CSV file.  
+  
+  Uses parse-csv from clojure-csv.core"
   [fname]
   (with-open [file (io/reader fname)]
     (doall (parse-csv (slurp fname)))))
-
+	
+	;;TODO add timing
+	
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare mm) ;forward decl for memoization function
  
  ;; define a function "m" with inputs i and w.  index?  and???
-(defn m [i w available-dolls]
-  ;; COND--Takes a set of test/expr pairs. It evaluates each test one at a time.  If a test returns logical true, cond evaluates and returns
-		;;the value of the corresponding expr and doesn't evaluate any of the other tests or exprs. (cond) returns nil.
+(defn m [index w available-dolls]
   (cond
-    (< i 0) [0 []]		;;if (i < 0) then return ??
-    (= w 0) [0 []]		;;else if (w = 0) then return ??
-    :else				;;else
-	;; LET--(let [bindings*] exprs*)
-	;; binding => binding-form init-expr
-	;;	Evaluates the exprs in a lexical context in which the symbols in the binding-forms are bound to their respective init-exprs or parts therein.
-	(let [{wi :weight vi :value} (get available-dolls i)]	 ;;soo... value in 'items' at 'i' --> weight and value?
-	;;(println wi "+" vi)
-											;; key binding map:  new var "wi" with weight column, new var "vi" with value column
-											;; GET--Returns the value mapped to key, not-found or nil if key not present.    (get {:a 1 :b 2} :b)   ;;=> 2
-      (if (> wi w)		;; if weight_current_item is greater than total weight?
-        (mm (dec i) w available-dolls)	;; DEC--Returns a number one less than num.  decrement i, return mm(i-1, w)
-        (let [[vn sn :as no]  (mm (dec i) w available-dolls)	;;what?  
-              [vy sy :as yes] (mm (dec i) (- w wi) available-dolls)]
-          (if (> (+ vy vi) vn)  ;;if new value is less than 
-            [(+ vy vi) (conj sy i)] ;; conjoin i onto the end of sy:  [] conj with 0 = 0, vector of [3 0]
-            no)
+    (or (< index 0) (= w 0)) [0 []]		;;if (i < 0) then return ??
+    
+	:else
+	(let [{wi :weight vi :value} (get available-dolls index)]
+	  ;; if valid weight, let's consider the possibilities
+      (if (< wi w)
+	  
+        (let [[val-notpack dollset-notpack]  (mm (dec index) w available-dolls)	  
+             [val-yespack dollset-yespack]   (mm (dec index) (- w wi) available-dolls)]
+		  ;; if the current doll's value + our OK'd dollset so far is greater than not packing it, obviously, pack it
+          (if (> (+ val-yespack vi) val-notpack)
+		    ;; if true, return [value dollset] with new doll value and index added
+            [(+ val-yespack vi) (conj dollset-yespack index)] 
+			;; else, forget it.  Return an older [value dollset] without this current doll considered
+            (mm (dec index) w available-dolls);;[val-notpack dollset-notpack]
+		  )
 		)
+		;; else, let's not even bother.  The result of this mm(i, w) call is actually the result of mm(i-1, w)
+		(mm (dec index) w available-dolls)	;;B[i,w] = B[i-1,w] // wi > w
 	  )
 	)
   )
 )
- 
-;;MEMOIZE--Returns a memoized version of a referentially transparent function. The memoized version of the function keeps a cache of the mapping 
-;;from arguments to results and, when calls with the same arguments are repeated often, has higher performance at the expense of higher memory use.
+
 (def mm (memoize m))
 
-;;TODO simplify
+;;TODO simplify?  are we receiving the packed dolls already?
 (defn total-packed-weight
 	[packed-doll-set indexes-of-packed-dolls]
+	;;(pprint packed-doll-set)
 	(reduce + (map (comp :weight packed-doll-set) indexes-of-packed-dolls))
 )
 
 (defn find-optimization 
+  "TODO add comments"
   [weight-difference available-dolls]
  
   (def addition "none")
  
   (print "Ask your dealer for another doll like:  ")
   (doall
-  (for [ i (range 0 (-> available-dolls count))]
-    (let [{wi :weight vi :value ni :name} (get available-dolls i)]
-	  (if (<= wi weight-difference)
-	    (do 
-		  ;;(into [] (concat [1 2] [3 4] [5 6])
-		  (print ni "(w:"wi"), ")
-		;; TODO  (conj extra-value vi)  display increased value
-		)
-	  )
-	)
-  ))
-  (print "to optimize your old lady's carrying capacity\n")
+    (for [ i (range 0 (-> available-dolls count))]
+      (let [{wi :weight vi :value ni :name} (get available-dolls i)]
+	    (if (<= wi weight-difference)
+	      (do 
+		    ;;(into [] (concat [1 2] [3 4] [5 6])
+		    ;; TODO  (conj extra-value vi)  display increased value
+		    (print (str ni " (w: "wi"), ")))))))
+  (print " to optimize your old lady's carrying capacity.\n")
   ;;TODO(println extra-value);;(apply min extra-value))
 )
 
 (defn check-underpack
+  "TODO add comments" 
 	[weight-limit packed-weight available-dolls]
 	
 	(if (> (- weight-limit packed-weight) 0)
 	  (do 
-	    (println "You've still got"(- weight-limit packed-weight) "kilograms of weight capacity left!")
-		;;(println "Can I offer you some advice?")
+	    (println (str "You've still got "(- weight-limit packed-weight) " kilograms of weight capacity left!"))
 		(find-optimization (- weight-limit packed-weight) available-dolls)
 	  )
 	  (println "100% capacity... nice job, free trader"))
   )
   
+  
+;;TODO get working
+;;TODO add output csv?
 (defn get-doll-csv
+  "TODO add comments"
 	[location]
 	(into [] (with-open [in-file (io/reader "resources/test.csv")]
      (->>
@@ -103,12 +102,12 @@
 	  )
 	)
 )
-	   
   
 (defn -main
   "I don't do a whole lot ... yet."
   []
-	   
+  
+  ;;TODO:  add successful read message
   (def available-dolls (into [] (with-open [in-file (io/reader "resources/test.csv")]
      (->>
        (csv/parse-csv in-file)
@@ -116,32 +115,45 @@
        mappify 
        (cast-with #(Integer/parseInt %) {:only [:weight :value]})
        doall))))
-	   
-	;;(pprint available-dolls)
-	
-  ;;TODO, catch invalid answers
-  (println "weight limit?")
+  
+  (println "\n\n------------------------------------------------")
+  (println "------------------------------------------------")
+  (println "Welcome to kiloGrammaMule")  
+  (println "------------------------------------------------")
+  (println "Please place your CSV file of available dolls in doll-smuggler/resources once you receive information from your dealer.")
+    
+  (def max-doll-print 5)
+  (if (< (count available-dolls) max-doll-print)
+    (def max-doll-print (count available-dolls)))
+  
+  (println "\nList of dolls begins with these names: ") 
+  (let [names(map (comp :name available-dolls) (range 0 max-doll-print))]
+	(println  (clojure.string/join ", " names)))
+  
+  (println "\nPlease enter the granny's carrying capacity (in kilograms):  ")
+  ;; TODO catch invalid answers
   (def weight-limit 
-    (try
+    (try			;;add 'integer?'
       (read-string (read-line))
       (catch Exception e nil)))
- 
-  (println weight-limit)
 
-  (let [[value indexes] 
-		(m (-> available-dolls count dec) weight-limit available-dolls)	;; value
-        names(map (comp :name available-dolls) indexes)]
+	  (println (assert (every? (fn [x] (and (contains? x "weight") (contains? x "value"))) available-dolls))
+;; TODO filter out obvious no-gos
+
+  (let [[value indexes] (m (-> available-dolls count dec) weight-limit available-dolls) ;; value
+         names(map (comp :name available-dolls) indexes)]
 	(do 
-	   (println "------------------------------------------------")
+	   (println "\n------------------------------------------------")
 	   (println "RESULTS")
 	   (println "------------------------------------------------")
-	   (println "items to pack:" (clojure.string/join ", " names))
-	   (println "total value: $" value)
-	   (println "total weight: " (total-packed-weight available-dolls indexes) "kilograms")
+	   (println (str "Pack these dolls:\n\t" (clojure.string/join "\n\t" names)))
+	   (println (str "Total street value:\t$" value))
+	   (println (str "Total weight:\t\t" (total-packed-weight available-dolls indexes) " kilograms (out of " weight-limit")"))
 	   (println "------------------------------------------------")
 	   (println "SUGGESTIONS")
 	   (println "------------------------------------------------")
 	   (check-underpack weight-limit (total-packed-weight available-dolls indexes) available-dolls)
-    )
+	   (println "------------------------------------------------")
+	)
   )
 )
