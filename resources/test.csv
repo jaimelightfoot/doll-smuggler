@@ -1,5 +1,6 @@
 name,weight,value
 #example CSV file (using AO input data)
+#if you have this open in Excel (or similar), Save As, name as "test" and type ".csv" in the /resources dir
 Luke,9,150
 Anthony,13,35
 Candice,153,200
