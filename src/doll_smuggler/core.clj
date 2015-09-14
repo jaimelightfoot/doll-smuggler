@@ -14,6 +14,7 @@
   
   Uses parse-csv from clojure-csv.core and is also used in get-doll-csv function"
   [fname]
+  
   (with-open [file (io/reader fname)]
     (doall (parse-csv (slurp fname))))
 )
@@ -44,7 +45,7 @@
 )
 
 ;;============================================================================================
-;;	DOLL-PACKING ALGORITH (adapted from http://rosettacode.org/wiki/Knapsack_problem/0-1#Clojure)
+;;	DOLL-PACKING ALGORITH (reference: http://rosettacode.org/wiki/Knapsack_problem/0-1#Clojure)
 ;;============================================================================================
 
 (defn doll-could-fit
@@ -55,6 +56,14 @@
 (declare mm)
 
 (defn m [index weight-limit available-dolls]
+  "Algorithm from Rosetta Code (http://rosettacode.org/wiki/Knapsack_problem/0-1#Clojure)).  
+   Mathematical notation from http://cse.unl.edu/~goddard/Courses/CSCE310J/Lectures/Lecture8-DynamicProgramming.pdf
+   See 'References and About' section of the README file for more information about the algorithm.  
+   
+   After checking for invalid conditions, the algorithm considers if the doll (at a given row/vector of the 
+   vector of available dolls) can fit, and if so, what the consequences are on the weight and the value.  
+   Given that information, it returns the optimal set of [value [array-of-selected-dolls]].  It is helped by 
+   memoization, which prevents unnecessary repetition of previous work."
   (cond
     ;; Testing for invalid index or weight-limit.  If so, return a set with [(value = 0) [null dollset]]
     (or (< index 0) (= weight-limit 0)) [0 []]
@@ -79,10 +88,7 @@
 			;; Mathematically, m[i,w] = m[i-1,w]
             (mm (dec index) weight-limit available-dolls)))  ;;m[i,w] = m[i-1,w]
 		;; else, let's not even bother.  Mathematically, m[i,w] = B[i-1,w]
-		(mm (dec index) weight-limit available-dolls)
-	  )
-	)
-  )
+		(mm (dec index) weight-limit available-dolls))))
 )
 
 ;; Helps improve performance of recursive calls to algorithm by saving previous results, 
@@ -167,20 +173,21 @@
   (if (< (count available-dolls) max-doll-print)
     (def max-doll-print (count available-dolls)))
   
-  (println "\nList of dolls begins with these names: ") 
+  (println "\nList of dolls begins with these names: \n(visual verification that correct file is being used): ") 
   (let [names(map (comp :name available-dolls) (range 0 max-doll-print))]
-	(println  (clojure.string/join ", " names)))
+	(print  (clojure.string/join ", " names)))
+  (println "...")
   
   (println "\nPlease enter the granny's carrying capacity (in kilograms):  ")
   ;; TODO catch invalid answers
   (def weight-limit 
-    (try			;;add 'integer?'
+    (try	
       (read-string (read-line))
       (catch Exception e (println "Caught exception:" e))))
 	  
-	  ;;TODO add timing
+  ;;TODO add timing
 	  
-;; TODO filter out obvious no-gos
+  ;; TODO filter out obviously too-heavy dolls
   (let [[value indexes] (m (-> available-dolls count dec) weight-limit available-dolls) ;; value
          names(map (comp :name available-dolls) indexes)]
 	(do 

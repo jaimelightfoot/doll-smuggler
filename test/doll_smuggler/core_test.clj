@@ -39,8 +39,6 @@
     )
 )
 
-
-
 (def one-huge-doll-set
   [{:name "Monolith" :weight 12000 :value 500000}])
   
@@ -98,18 +96,44 @@
     )
 )
 
-(def speed-test
-
-)
-
+;;================================================================
+;; For future improvements 
 (deftest bad-csv-input
-
+  "Given a csv file with wrong type information in various columns, 
+   or a ragged input (nils in certain cells), test error handling"
+   (testing 
+     "Header row (used for keys) not present"
+   )
+   (testing 
+     "Non-string doll name"
+   )
+   (testing 
+     "Non-integer doll weight"
+   )
+   (testing 
+     "Non-integer doll value"
+   )
 )
 
 (deftest csv-file-not-found
-
+  "Given a bad file path or a file path to directory without test.csv, 
+  test error handling"
+   (testing 
+     "Bad file path"
+   )
+   (testing 
+     "File path to dir without test.csv"
+   )
 )
 
-(deftest negative-carrying-capacity
-
+(deftest bad-carrying-capacity
+  "The user can input whatever carrying capacity they want.  
+  Of course, this is inviting trouble.  Let's check to see if they 
+  entered in something that makes sense (right type, positive number). "
+  (testing 
+    "Non-integer carrying capacity"
+  )
+  (testing 
+    "Negative carrying capacity"
+  )
 )
