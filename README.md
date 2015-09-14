@@ -22,10 +22,6 @@ Requirements:
 
 This is a variation of the Knapsack problem (http://en.wikipedia.org/wiki/Knapsack_problem), which is NP-complete and is often solved with a dynamic programming approach.  
 
-## Benefits/Features
-
-- 
-
 # Installation
 
 To use the program, you must have leiningen.  Go to http://leiningen.org/ to install it.  
@@ -39,9 +35,9 @@ This program makes use of two additional clojure libraries, parse-csv and semant
 # Usage
 
 ## Input Data (CSV)
-This program takes a CSV file, containing the available dolls (along with their respective weights and values), parses them, and displays them on a console.  
+This program takes a CSV file containing the names of available dolls (along with their respective weights and values), parses them, and displays them on a console.  
 
-First, let's cover what's expected of the CSV file.  The file should contain all of your dolls, with the first row being a header file.  The first row must contain "name,weight,value".  The following rows must contain the name (as a String), weight (as an Integer) and value (as an Integer).  You may include comments in your document denoted by #, e.g. "#Available dolls listed below", as long as they are on their own row.    
+First, let's cover what's expected of the CSV file.  The file should contain all of your dolls' information, with the first row being a header file.  The first row must contain "name,weight,value".  The following rows must contain the name (as a String), weight (as an Integer) and value (as an Integer).  You may include comments in your document denoted by #, e.g. "#Available dolls listed below", as long as they are on their own row.    
 
 Here is an example of what the CSV file should look like.  
 
@@ -49,7 +45,7 @@ Here is an example of what the CSV file should look like.
 	Luke,9,150
 	Anthony,13,35
 	Candice,153,200
-	and so on...
+	#and so on...
 
 I would like to include validation for the CSV file (detecting wrong types, allowing floats, etc.) but for the time being (or rather, with the time allowed), an Excel file has been provided.  Fill this out, and then go File, Save As and select "CSV" as the type.  
 
@@ -109,15 +105,15 @@ Example output:
 ## References and About
 Being new to Clojure (and Lisp-like languages and functional programming), I first found a mathematical solution (cse.unl.edu link) to fully understand the algorithm (or rather, one possible algorithm).  I tried to mimic this approach with strictly my own code, and had quite a bit of difficulty, largely in part to my newness to Clojure.  
 
-I decided to study the Rosetta Code solution to the problem.  I didn't fully understand it at first (the "no" and "yes" was especially confusing), but determined to write my own algorithm, tried developing my own version.  Through repeated tries, my attempts at my own algorithm improved, and I understood the original algorithm better.  I reached a point where (from increased knowledge or increased familiarity with RC's answer), my algorithm and the RC algorithm looked more and more similar.  While the code's similarity to the Rosetta Code original makes it look like little work was done, the multiple iterations of (trying to) write my own algorithm taught me a lot more than is evident in my solution.  I intend this section of the README to be an acknowledgement of that 'unseen' effort.  
+I decided to study the Rosetta Code solution to the problem.  I didn't fully understand it at first (the "no" and "yes" was especially confusing), but determined to write my own algorithm, tried developing my own version.  Through repeated tries, my attempts at my own algorithm improved, and I understood the original algorithm better.  I reached a point where (from increased knowledge or increased familiarity with RC's answer), my algorithm and the RC algorithm looked more and more similar.  While the code's similarity to the Rosetta Code original makes it look like little work was done, the multiple iterations of (trying to) write my own algorithm taught me a lot more than is evident in my solution.  The pages of notes that I took to understand each line of RC's algorithm exceed the length of their algorithm by a couple hundred lines.  I intend this section of the README to be an acknowledgement of that 'unseen' effort.  
 
 The additional comments in the algorithm function are to show understanding of the code (that it wasn't just copy/paste with variable name changes).  The variable name changes were to make the code more readable in English, so you don't have to divine what "sn" means, for example ("set of dolls with the current doll not included").  
 
 While this was definitely a challenging problem for me, I appreciated it and learned a lot (some of it completely new, some of it expanded knowledge):  Dynamic programming, a few random pieces of Java (since taken out of core.clj), different classifications of complexity (NP-complete, etc.), 
-polynomial time, and a ton of Clojure things, of course:  syntax; symbols; structures; maps; vectors; atoms; a few detours into what happens behind the scenes with memoize, csv parsing, etc; a couple hundred missplaced parenthesis (in c it's foo(bar) not (foo bar)...);
+polynomial time, and a ton of Clojure things, of course:  syntax; symbols; structures; maps; vectors; atoms; a few detours into what happens behind the scenes with memoize, csv parsing, etc; a couple hundred misplaced parenthesis (in C it's foo(bar) not (foo bar)...);
 keys; sorting; file parsing; testing; bindings; and many more.  
 
-Many thanks to:  
+Acknowledged Reference Material:  
 - Rosetta Code's Clojure solution to the knapsack problem:  http://rosettacode.org/wiki/Knapsack_problem/0-1#Clojure
 - Helpful step-by-step explanation of the knapsack problem:  http://cse.unl.edu/~goddard/Courses/CSCE310J/Lectures/Lecture8-DynamicProgramming.pdf
 - Stack Overflow
@@ -142,5 +138,4 @@ A list of things I'd like to implement, given more time and my budding familiari
 
 Copyright © 2015 Jaime Lightfoot
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Eclipse Public License either version 1.0 or any later version.

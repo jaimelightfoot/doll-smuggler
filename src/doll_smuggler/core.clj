@@ -31,9 +31,7 @@
   lot of financial (and logistical) documentation is often in CSV format, or easily
   converted to CSV format.  This provides an relatively common and convenient way to
   input data."
-  [array]
-  
-  (def location "resources/test.csv")
+  [array location]
 
   (into [] (with-open [in-file (io/reader location)]
     (->>
@@ -163,43 +161,47 @@
   a dynamic programming algorithm, reports the results, and offers improvements for the next order."
   []
   
-  ;;TODO:  add successful read message
-  (def available-dolls (get-doll-csv available-dolls))
-
   (make-header "Welcome to kiloGrammaMule") 
-  (println "Please place your CSV file of available dolls in doll-smuggler/resources once you receive information from your dealer.")
-    
-  (def max-doll-print 5)
-  (if (< (count available-dolls) max-doll-print)
-    (def max-doll-print (count available-dolls)))
-  
-  (println "\nList of dolls begins with these names: \n(visual verification that correct file is being used): ") 
-  (let [names(map (comp :name available-dolls) (range 0 max-doll-print))]
-	(print  (clojure.string/join ", " names)))
-  (println "...")
-  
-  (println "\nPlease enter the granny's carrying capacity (in kilograms):  ")
-  ;; TODO catch invalid answers
-  (def weight-limit 
-    (try	
-      (read-string (read-line))
-      (catch Exception e (println "Caught exception:" e))))
+ 
+  (def location "resources/test.csv")
+ 
+  (if (not (.exists (as-file location)))
+	(println "Please place your CSV (test.csv) file of available dolls in doll-smuggler/resources once you receive information from your dealer, and restart the program.\n")
+    (do 
+	  (println "\nCSV file read successfully.\n")
+	  (def available-dolls (get-doll-csv available-dolls location))
 	  
-  ;;TODO add timing
+	  (def max-doll-print 5)
+	  (if (< (count available-dolls) max-doll-print)
+		(def max-doll-print (count available-dolls)))
 	  
-  ;; TODO filter out obviously too-heavy dolls
-  (let [[value indexes] (m (-> available-dolls count dec) weight-limit available-dolls) ;; value
-         names(map (comp :name available-dolls) indexes)]
-	(do 
-       (make-header "RESULTS")
-	   (println (str "Pack these dolls:\n\t" (clojure.string/join "\n\t" names)))
-	   (println (str "Total street value:\t$" value))
-	   (def packed-weight (total-packed-weight available-dolls indexes))
-	   (println (str "Total weight:\t\t" packed-weight " kilograms (out of " weight-limit")"))
+	  (println "Your list of dolls begins with these names: \n(visual verification that correct file is being used): ") 
+	  (let [names(map (comp :name available-dolls) (range 0 max-doll-print))]
+		(print  (clojure.string/join ", " names)))
+	  (println "...")
+	  
+	  (println "\nPlease enter the granny's carrying capacity (in kilograms):  ")
+	  ;; TODO catch invalid answers
+	  (def weight-limit 
+		(try	
+		  (read-string (read-line))
+		  (catch Exception e (println "Caught exception:" e))))
+		  
+	  ;;TODO add timing
+		  
+	  ;; TODO filter out obviously too-heavy dolls
+	  (let [[value indexes] (m (-> available-dolls count dec) weight-limit available-dolls) ;; value
+			 names(map (comp :name available-dolls) indexes)]
+		(do 
+		   (make-header "RESULTS")
+		   (println (str "Pack these dolls:\n\t" (clojure.string/join "\n\t" names)))
+		   (println (str "Total street value:\t$" value))
+		   (def packed-weight (total-packed-weight available-dolls indexes))
+		   (println (str "Total weight:\t\t" packed-weight " kilograms (out of " weight-limit")"))
 
-	   (make-header "ANALYTICS")
-	   (check-if-underpacked weight-limit packed-weight available-dolls indexes)
-	   (print-divider)
+		   (make-header "ANALYTICS")
+		   (check-if-underpacked weight-limit packed-weight available-dolls indexes)
+		   (print-divider)))
+	  )
 	)
-  )
 )
