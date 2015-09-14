@@ -175,12 +175,13 @@
 	  (if (< (count available-dolls) max-doll-print)
 		(def max-doll-print (count available-dolls)))
 	  
-	  (println "Your list of dolls begins with these names: \n(visual verification that correct file is being used): ") 
+	  (println "Your list of dolls begins with these names: ")
+	  ;;(visual verification that correct file is being used):  
 	  (let [names(map (comp :name available-dolls) (range 0 max-doll-print))]
 		(print  (clojure.string/join ", " names)))
 	  (println "...")
 	  
-	  (println "\nPlease enter the granny's carrying capacity (in kilograms):  ")
+	  (println "\nPlease enter the granny's carrying capacity (in kilograms, integers only):  ")
 	  ;; TODO catch invalid answers
 	  (def weight-limit 
 		(try	
