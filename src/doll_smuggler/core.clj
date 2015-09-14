@@ -64,7 +64,7 @@
 	;; key (:weight and :value) and assign those values to doll-weight and doll-value integers.  
 	(let [{doll-weight :weight doll-value :value} (get available-dolls index)]
 	  ;; Check to see if it's even a possibility, given the current doll's weight
-      (if (< possible-doll weight-limit)
+      (if (< doll-weight weight-limit)
 	    ;; Locally bind a call to the m(index, weight) function to a set containing 
 		;; [total-value dollset-resulting-in-that-value]
         (let [[val-ifnotpack dollset-ifnotpack]  (mm (dec index) weight-limit available-dolls)	  
